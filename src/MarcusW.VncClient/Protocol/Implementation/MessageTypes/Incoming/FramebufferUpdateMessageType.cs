@@ -153,6 +153,9 @@ namespace MarcusW.VncClient.Protocol.Implementation.MessageTypes.Incoming
                             // Release the framebuffer reference if per-rectangle updates are enabled so a new one gets requested for the next rectangle.
                             if (_lockTargetByRectangle)
                             {
+                                // Call UpdateRectangle on the framebuffer reference if it implements IFramebufferRectangleReference
+                                if (targetFramebuffer is IFramebufferRectangleReference framebufferRectangleReference)
+                                    framebufferRectangleReference.UpdateRectangle(rectangle);
                                 targetFramebuffer?.Dispose();
                                 targetFramebuffer = null;
                             }

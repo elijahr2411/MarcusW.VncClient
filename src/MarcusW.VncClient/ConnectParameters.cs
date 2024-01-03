@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Net;
 using MarcusW.VncClient.Output;
+using MarcusW.VncClient.Protocol.EncodingTypes;
+using MarcusW.VncClient.Protocol.Implementation.EncodingTypes;
 using MarcusW.VncClient.Rendering;
 using MarcusW.VncClient.Security;
 using MarcusW.VncClient.Utils;
@@ -29,6 +32,8 @@ namespace MarcusW.VncClient
         private IOutputHandler? _initialOutputHandler;
         private int _jpegQualityLevel = 100;
         private JpegSubsamplingLevel _jpegSubsamplingLevel = JpegSubsamplingLevel.None;
+        private IList<EncodingTypes>? _encodingTypes;
+
 
         /// <summary>
         /// Specifies the transport type and parameters to connect to.
@@ -130,6 +135,15 @@ namespace MarcusW.VncClient
         {
             get => _jpegSubsamplingLevel;
             set => ThrowIfFrozen(() => _jpegSubsamplingLevel = value);
+        }
+
+        /// <summary>
+        /// If set, specifies the encoding types that should be used for the connection.
+        /// </summary>
+        public IList<EncodingTypes>? EncodingTypes
+        {
+            get => _encodingTypes;
+            set => ThrowIfFrozen(() => _encodingTypes = value);
         }
 
         /// <inhertitdoc />

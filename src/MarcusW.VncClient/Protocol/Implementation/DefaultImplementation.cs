@@ -186,5 +186,70 @@ namespace MarcusW.VncClient.Protocol.Implementation
             yield return new DesktopSizeEncodingType(context);
             yield return new ExtendedDesktopSizeEncodingType(context);
         }
+        public static IEnumerable<IEncodingType> GetRequestedEncodingTypes(RfbConnectionContext context,
+            IList<EncodingTypes.EncodingTypes> requestedEncodings)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            if (requestedEncodings == null)
+                throw new ArgumentNullException(nameof(requestedEncodings));
+
+            foreach (EncodingTypes.EncodingTypes encodingType in requestedEncodings)
+            {
+                switch (encodingType)
+                {
+                    // Frame
+                    case EncodingTypes.EncodingTypes.RawEncodingType:
+                        yield return new RawEncodingType();
+                        break;
+                    case EncodingTypes.EncodingTypes.CopyRectEncodingType:
+                        yield return new CopyRectEncodingType();
+                        break;
+                    case EncodingTypes.EncodingTypes.ZlibEncodingType:
+                        yield return new ZLibEncodingType(context);
+                        break;
+                    case EncodingTypes.EncodingTypes.ZrleEncodingType:
+                        yield return new ZrleEncodingType(context);
+                        break;
+                    case EncodingTypes.EncodingTypes.TightEncodingType:
+                        if (IsTightAvailable)
+                            yield return new TightEncodingType(context);
+                        else
+                            context.Connection.LoggerFactory.CreateLogger<DefaultImplementation>().LogWarning(
+                                "The TurboJPEG library is not installed on the current system. Please expect a performance drop, because the Tight encoding type is not available.");
+                        break;
+
+                    // Pseudo
+                    case EncodingTypes.EncodingTypes.FenceEncodingType:
+                        yield return new FenceEncodingType();
+                        break;
+                    case EncodingTypes.EncodingTypes.ContinuousUpdatesEncodingType:
+                        yield return new ContinuousUpdatesEncodingType();
+                        break;
+                    case EncodingTypes.EncodingTypes.LastRectEncodingType:
+                        yield return new LastRectEncodingType();
+                        break;
+                    case EncodingTypes.EncodingTypes.JpegQualityLevelEncodingType:
+                        yield return new JpegQualityLevelEncodingType(context);
+                        break;
+                    case EncodingTypes.EncodingTypes.JpegFineGrainedQualityLevelEncodingType:
+                        yield return new JpegFineGrainedQualityLevelEncodingType(context);
+                        break;
+                    case EncodingTypes.EncodingTypes.JpegSubsamplingLevelEncodingType:
+                        yield return new JpegSubsamplingLevelEncodingType(context);
+                        break;
+                    case EncodingTypes.EncodingTypes.DesktopSizeEncodingType:
+                        yield return new DesktopSizeEncodingType(context);
+                        break;
+                    case EncodingTypes.EncodingTypes.ExtendedDesktopSizeEncodingType:
+                        yield return new ExtendedDesktopSizeEncodingType(context);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(requestedEncodings), encodingType, $"The encoding type {encodingType} is not supported.");
+                }
+            }
+        }
     }
 }

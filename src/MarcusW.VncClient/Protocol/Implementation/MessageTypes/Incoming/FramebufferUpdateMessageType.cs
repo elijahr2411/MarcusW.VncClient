@@ -71,7 +71,8 @@ namespace MarcusW.VncClient.Protocol.Implementation.MessageTypes.Incoming
             if (transport == null)
                 throw new ArgumentNullException(nameof(transport));
 
-            cancellationToken.ThrowIfCancellationRequested();
+            // I cannot even fathom why this was here, because it causes an exception on disconnect
+            //cancellationToken.ThrowIfCancellationRequested();
 
             Stream transportStream = transport.Stream;
             Span<byte> buffer = _buffer.AsSpan();

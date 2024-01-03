@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using MarcusW.VncClient.Protocol;
+using MarcusW.VncClient.Protocol.Implementation;
 using MarcusW.VncClient.Protocol.Services;
 using MarcusW.VncClient.Utils;
 using Microsoft.Extensions.Logging;
@@ -32,7 +34,7 @@ namespace MarcusW.VncClient
             context.JpegDecoder = ProtocolImplementation.CreateJpegDecoder(context);
 
             // Create message and encoding types collections in an order which allows e.g. the message types to get an overview of all registered encodings.
-            context.SupportedEncodingTypes = ProtocolImplementation.CreateEncodingTypesCollection(context);
+            context.SupportedEncodingTypes = Parameters.EncodingTypes != null ? DefaultImplementation.GetRequestedEncodingTypes(context, Parameters.EncodingTypes).ToImmutableHashSet() : ProtocolImplementation.CreateEncodingTypesCollection(context);
             context.SupportedMessageTypes = ProtocolImplementation.CreateMessageTypesCollection(context);
             context.SupportedSecurityTypes = ProtocolImplementation.CreateSecurityTypesCollection(context);
 

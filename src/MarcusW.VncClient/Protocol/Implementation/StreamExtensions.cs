@@ -31,7 +31,7 @@ namespace MarcusW.VncClient.Protocol.Implementation
             var bytesRead = 0;
             do
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                //cancellationToken.ThrowIfCancellationRequested();
 
                 int read = stream.Read(bytesRead == 0 ? buffer : buffer.Slice(bytesRead));
                 if (read == 0)
@@ -39,7 +39,7 @@ namespace MarcusW.VncClient.Protocol.Implementation
 
                 bytesRead += read;
             }
-            while (bytesRead < numBytes);
+            while (bytesRead < numBytes && !cancellationToken.IsCancellationRequested);
         }
 
         /// <summary>

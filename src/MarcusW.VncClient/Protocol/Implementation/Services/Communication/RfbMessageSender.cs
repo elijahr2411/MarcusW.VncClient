@@ -75,7 +75,9 @@ namespace MarcusW.VncClient.Protocol.Implementation.Services.Communication
             if (_disposed)
                 throw new ObjectDisposedException(nameof(RfbMessageSender));
 
-            cancellationToken.ThrowIfCancellationRequested();
+            //cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+                return;
 
             TMessageType messageType = GetAndCheckMessageType<TMessageType>();
 
@@ -100,12 +102,15 @@ namespace MarcusW.VncClient.Protocol.Implementation.Services.Communication
             if (_disposed)
                 throw new ObjectDisposedException(nameof(RfbMessageSender));
 
-            cancellationToken.ThrowIfCancellationRequested();
+            //cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+                return Task.CompletedTask;
 
             TMessageType messageType = GetAndCheckMessageType<TMessageType>();
 
             // Create a completion source and ensure that completing the task won't block our send-loop.
             var completionSource = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
 
             // Add message to queue
             _queue.Add(new QueueItem(message, messageType, completionSource), cancellationToken);
@@ -125,6 +130,9 @@ namespace MarcusW.VncClient.Protocol.Implementation.Services.Communication
                 // Iterate over all queued items (will block if the queue is empty)
                 foreach (QueueItem queueItem in _queue.GetConsumingEnumerable(cancellationToken))
                 {
+                    // Check if the queue was cancelled
+                    if (cancellationToken.IsCancellationRequested)
+                        break;
                     IOutgoingMessage<IOutgoingMessageType> message = queueItem.Message;
                     IOutgoingMessageType messageType = queueItem.MessageType;
 
@@ -150,10 +158,12 @@ namespace MarcusW.VncClient.Protocol.Implementation.Services.Communication
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 // When the loop was canceled or failed, cancel all remaining queue items
                 SetQueueCancelled();
+                if (ex is OperationCanceledException) // Don't throw OperationCanceledException
+                    return;
                 throw;
             }
         }
